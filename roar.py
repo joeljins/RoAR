@@ -26,13 +26,3 @@ while True:
     i = temp.index(max(temp))
     delta = '
     '''
-
-def generate_grid(center, delta, n, p=None):
-    linspaces = [np.linspace(center[i]-delta, center[i]+delta, n) for i in range(len(center))]
-    grids = np.meshgrid(*linspaces)
-    points = np.stack([grid.reshape(-1) for grid in grids]).T
-    if p != None:
-        mask = np.linalg.norm(points-center, ord=p, axis=1) <= delta
-        points = points[mask]
-    return points
-    θ = 0
