@@ -1,0 +1,30 @@
+\documentclass{article}
+\usepackage{amsmath}
+
+\begin{document}
+
+\section{Introduction}
+
+\begin{equation}
+\label{eq:recourse}
+\ell(f_i(x), 1) + \lambda \, c(x_z, x)
+\end{equation}
+
+\begin{equation}
+\ell(f_i(x), 1) = (1 - f_i(x))^2
+\end{equation}
+
+\begin{equation}
+f_i(x) = (1-\frac{1}{1+e^{w^T x}})^2
+\end{equation}
+
+\begin{equation}
+(1-\frac{1}{1+e^{w^T x}})^2 + \lambda c(x_z, x)
+\end{equation}
+
+\begin{equation}
+c(x_z, x) = |x_z - x|^2 
+\end{equation}
+
+\end{document}
+
