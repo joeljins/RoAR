@@ -5,8 +5,9 @@
 
 \section{Introduction}
 
+One college:
+
 \begin{equation}
-\label{eq:recourse}
 \ell(f_i(x), 1) + \lambda \, c(x_z, x)
 \end{equation}
 
@@ -45,8 +46,27 @@ f''(x) = \frac{2 \left({\lambda}\mathrm{e}^{4w^{T} x} + \left(4{\lambda} - w^{2T
 Two colleges:
 
 \begin{equation}
-f(x)=1-\Pi_{i=1}^n(1-f_i(x)),
+\ell(f_i(x), 1) + \lambda \, c(x_z, x)
+\end{equation}
+
+\begin{equation}
+f(x)=1-\Pi_{i=1}^n(1-f_i(x))
+\end{equation}
+
+\begin{equation}
+f_1(x) = (1-\frac{1}{1+e^{w^T x}})^2
+\end{equation}
+
+\begin{equation}
+f_2(x) = (1-\frac{1}{1+e^{w^T x}})^2
+\end{equation}
+
+\begin{equation}
+f(x)=1-\Pi_{i=1}^n(1-f_i(x))
+\end{equation}
+
+\begin{equation}
+f(x)=1-[(1-(1-\frac{1}{1+e^{w^T x}}))^2 \cdot (1-(1-\frac{1}{1+e^{w^T x}}))^2]
 \end{equation}
 
 \end{document}
-
