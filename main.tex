@@ -1,39 +1,25 @@
 \documentclass{article}
 \usepackage{amsmath}
-
+\label{sec:framework}
 \begin{document}
 
 \section{Introduction}
 
 One college:
 
-\begin{equation}
-\ell(f_i(x), 1) + \lambda \, c(x_z, x)
-\end{equation}
-
-\begin{equation}
-\ell(f_i(x), 1) = (1 - f_i(x))^2
-\end{equation}
-
-\begin{equation}
-f_i(x) = (1-\frac{1}{1+e^{w^T x}})^2
-\end{equation}
-
-\begin{equation}
-(1-\frac{1}{1+e^{w^T x}})^2 + \lambda c(x_z, x)
-\end{equation}
-
-\begin{equation}
-c(x_z, x) = \|x_z - x\|^2 
-\end{equation}
-
-\begin{equation}
-(1-\frac{1}{1+e^{w^T x}})^2 + \lambda =\|x_z - x\|^2 
-\end{equation}
-
-\begin{align}
-f(x) = \frac{d}{dx}(1-\frac{1}{1+e^{w^T x}})^2 + \lambda \|x_z - x\|^2 \\ 
-\end{align}
+\begin{flalign}
+    \text{Proof} && \nonumber \\
+    && \ell(f_i(x), 1) + \lambda \, c(x_z, x) && \text{Recourse function} \\
+    && \ell(f_i(x), 1) = (1 - f_i(x))^2 && \text{Def. of binary cross-entropy} \\
+    && (1 - f_i(x))^2 + \lambda \, c(x_z, x) && \nonumber \\
+    && f_i(x) = \frac{1}{1+e^{-w^T x}} && \text{Logistic function} \\
+    && (1 - \frac{1}{1+e^{-w^T x}})^2 + \lambda \, c(x_z, x) && \nonumber \\
+    && c(x_z, x) = \|x_z - x\|^2 && \text{L1 Norm} \\
+    && (1 - \frac{1}{1+e^{-w^T x}})^2 + \lambda \|x_z - x\|^2 && \nonumber \\
+    && -\frac{2w^{T} \mathrm{e}^{-w^{T} x} \left(1 - \frac{1}
+    {\mathrm{e}^{-w^{T} x} + 1}\right)}{\left(\mathrm{e}^{-w^{T} x} + 1\right)^{2}} 
+    - 2{\lambda} \left(x_{z} - x\right) && \text{1st derivative} \\
+\end{flalign}
 
 \begin{align}
 f'(x)= 2 \cdot \frac{-we^{w^Tx}}{ (1 + e^{w^T x})^2 } \cdot (1-\frac{1}{1+e^{w^T x}})^2 + -2\lambda (x_z - x)
@@ -68,5 +54,21 @@ f(x)=1-\Pi_{i=1}^n(1-f_i(x))
 \begin{equation}
 f(x)=1-[(1-(1-\frac{1}{1+e^{w^T x}}))^2 \cdot (1-(1-\frac{1}{1+e^{w^T x}}))^2]
 \end{equation}
+
+\section{Using \texttt{flalign}}
+
+\begin{flalign}
+    \text{Proof} && \nonumber \\
+    && \ell(f_i(x), 1) + \lambda \, c(x_z, x) && \text{Recourse function} \\
+    && \ell(f_i(x), 1) = (1 - f_i(x))^2 && \text{Def. of binary cross-entropy} \\
+    && (1 - f_i(x))^2 + \lambda \, c(x_z, x) && \nonumber \\
+    && f_i(x) = \frac{1}{1+e^{-w^T x}} && \text{Logistic function} \\
+    && (1 - \frac{1}{1+e^{-w^T x}})^2 + \lambda \, c(x_z, x) && \nonumber \\
+    && c(x_z, x) = \|x_z - x\|^2 && \text{L1 Norm} \\
+    && (1 - \frac{1}{1+e^{-w^T x}})^2 + \lambda \|x_z - x\|^2 && \nonumber \\
+    && -\frac{2w^{T} \mathrm{e}^{-w^{T} x} \left(1 - \frac{1}
+    {\mathrm{e}^{-w^{T} x} + 1}\right)}{\left(\mathrm{e}^{-w^{T} x} + 1\right)^{2}} 
+    - 2{\lambda} \left(x_{z} - x\right) && \text{1st derivative} \\
+\end{flalign}
 
 \end{document}
