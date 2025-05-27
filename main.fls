@@ -1,6 +1,6 @@
-PWD c:\Users\joelj\Desktop\RoAR
+PWD c:\Users\joelj\OneDrive\Desktop\RoAR
 INPUT C:\Users\joelj\AppData\Local\MiKTeX\miktex\data\le\pdftex\pdflatex.fmt
-INPUT c:\Users\joelj\Desktop\RoAR\main.tex
+INPUT c:\Users\joelj\OneDrive\Desktop\RoAR\main.tex
 OUTPUT main.log
 INPUT C:\Users\joelj\AppData\Local\Programs\MiKTeX\tex\latex\base\article.cls
 INPUT C:\Users\joelj\AppData\Local\Programs\MiKTeX\tex\latex\base\article.cls
