@@ -202,9 +202,9 @@ def alt_fair_opt_step(pop_A, pop_B, u_plus, u_minus, c_plus, c_minus, alpha, ran
     
     return opt_A, opt_B, thresh_A, thresh_B, max_util
 
-def alt_fair_step(A, B, u_plus, u_minus, c_plus, c_minus, alpha, range, size):
-    begin = range[0]
-    end = range[1]
+def alt_fair_step(A, B, u_plus, u_minus, c_plus, c_minus, alpha, domain, size):
+    begin = domain[0]
+    end = domain[1]
     thresholds = np.arange(begin, end, size)
 
     max_util = -np.inf
