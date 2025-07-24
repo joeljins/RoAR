@@ -143,7 +143,7 @@ def alt_fair_opt_step(pop_A, pop_B, u_plus, u_minus, c_plus, c_minus, alpha, ran
     w_a = n / (n + m)
     w_b = 1 - w_a
     
-    # Compute deltas once
+    # Compute deltas
     delta_A = expected(pop_A, c_plus, c_minus)  # Shape: (n,)
     delta_B = expected(pop_B, c_plus, c_minus)  # Shape: (m,)
     
@@ -160,10 +160,15 @@ def alt_fair_opt_step(pop_A, pop_B, u_plus, u_minus, c_plus, c_minus, alpha, ran
     delta_A_bc = delta_A[np.newaxis, np.newaxis, :]  # (1, 1, n)
     delta_B_bc = delta_B[np.newaxis, np.newaxis, :]  # (1, 1, m)
     
+    '''
     # Apply adjustments conditionally
     # Only apply delta where original + delta > threshold
     condition_A = (A_bc + delta_A_bc) > thresh_a_bc  # (T, T, n)
     condition_B = (B_bc + delta_B_bc) > thresh_b_bc  # (T, T, m)
+    '''
+    condition_A = A_bc > thresh_a_bc  # (T, T, n)
+    condition_B = B_bc > thresh_b_bc  # (T, T, m)
+
     
     a_adj = np.where(condition_A, A_bc + delta_A_bc, A_bc)  # (T, T, n)
     b_adj = np.where(condition_B, B_bc + delta_B_bc, B_bc)  # (T, T, m)
@@ -186,10 +191,12 @@ def alt_fair_opt_step(pop_A, pop_B, u_plus, u_minus, c_plus, c_minus, alpha, ran
     # Apply fairness mask
     util_masked = np.where(mean_diff < alpha, util_combined, -np.inf)
     
+    
     # Find optimal combination
     if np.all(util_masked == -np.inf):
         # No fair solution exists
         return None, None, None, None, -np.inf
+    
     
     i, j = np.unravel_index(np.argmax(util_masked), util_masked.shape)
     

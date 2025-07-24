@@ -14,7 +14,8 @@ def experiment_3(a, b, u_plus, u_minus, c_plus, c_minus, alpha, domain, interval
     B = np.where(b > thresh_B, b + delta_B, b)
     util_B = w_b * np.sum(expected(B, u_plus, u_minus))
 
-    c1_all = {}
+    #c1_all = {}
+    all_sets = {}
     greatest = -np.inf
 
     for thresh_A in np.arange(domain[1], domain[0], -interval):
@@ -26,8 +27,9 @@ def experiment_3(a, b, u_plus, u_minus, c_plus, c_minus, alpha, domain, interval
         c3 = np.where((a > thresh_A) & (expected(a, u_plus, u_minus) < 0) & (delta_A >= 0))[0]
         c4 = np.where((a > thresh_A) & (expected(a, u_plus, u_minus) < 0) & (delta_A < 0))[0]
 
-        c1_all[round(thresh_A, 2)] = w_a * expected(A[c1], u_plus, u_minus) 
+        #c1_all[round(thresh_A, 2)] = w_a * expected(A[c1], u_plus, u_minus) 
         #c1_all.append(expected(A[c1], u_plus, u_minus))
+        all_sets[round(thresh_A, 2)] = A
 
         total = np.where(a > thresh_A)[0]
         util_A = w_a * np.sum(expected(A, u_plus, u_minus))
@@ -42,7 +44,7 @@ def experiment_3(a, b, u_plus, u_minus, c_plus, c_minus, alpha, domain, interval
         print(f'Threshold {round(thresh_A, 2)}: {util_A}')
         #print(f'{np.isclose(util_above + util_below, util_A)}')
         print(f'{util_below} + {util_above}')
-        print(f'Cat 1 Util: {c1_all[round(thresh_A, 2)]}')
+        #print(f'Cat 1 Util: {c1_all[round(thresh_A, 2)]}')
         #print(f'{len(total)}:   C1: {len(c1)} C2: {len(c2)} C3: {len(c3)} C4: {len(c4)} \n' )
         print(
         f'Total: {len(total)}\n'
@@ -52,7 +54,7 @@ def experiment_3(a, b, u_plus, u_minus, c_plus, c_minus, alpha, domain, interval
         f'C4:    {len(c4)}\n'
         )
     print(f'Greatest utility: {greatest}')
-    return c1_all
+    return all_sets
 
 
     alpha_line = go.Scatter(x=x_thresh_A, y=[alpha]*len(x_thresh_A), name='Alpha Line', mode='lines')

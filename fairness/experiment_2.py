@@ -28,11 +28,11 @@ def experiment_2(a, b, u_plus, u_minus, c_plus, c_minus, alpha, domain, interval
         y_util.append(total_util)
         y_means_diff.append(diff)
 
-    alpha_line = go.Scatter(x=x_thresh_A, y=[alpha]*len(x_thresh_A), name='Alpha Line', mode='lines')
-    util = go.Scatter(x=x_thresh_A, y=y_util, name='Total Utility', mode='markers', yaxis='y2')
-    means_diff = go.Scatter(x=x_thresh_A, name='Mean Diff', y=y_means_diff)
-    
-    fig = go.Figure(data=[util, means_diff, alpha_line])
+    alpha_line = go.Scatter(x=x_thresh_A, y=[alpha]*len(x_thresh_A), name='Alpha', mode='lines')
+    means_diff = go.Scatter(x=x_thresh_A, name='Mean Diff', mode='markers', y=y_means_diff, fill='tonexty',fillcolor='rgba(0,0,255,0.2)')
+    util = go.Scatter(x=x_thresh_A, y=y_util, name='Total Utility', mode='markers', yaxis='y2', marker=dict(color='green'))
+
+    fig = go.Figure(data=[alpha_line, means_diff, util])
     fig.update_layout(
         height = 600,
         title='Threshold A with Fixed Threshold B vs Mean Difference',
