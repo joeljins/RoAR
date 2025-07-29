@@ -4,7 +4,7 @@ import numpy as np
 
 def experiment_2(a, b, u_plus, u_minus, c_plus, c_minus, alpha, domain, interval, w_a, w_b):
     # B starts out at the optimal threshold regardless of Alpha
-    results = alt_fair_opt_step(a, b, u_plus, u_minus, c_plus, c_minus, alpha, domain, interval)
+    results = alt_fair_opt_step(a, b, u_plus, u_minus, c_plus, c_minus, alpha, domain, 0.01)
 
     x_thresh_A = []
     thresh_B = results[3] 

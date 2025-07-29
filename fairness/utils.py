@@ -189,7 +189,7 @@ def alt_fair_opt_step(pop_A, pop_B, u_plus, u_minus, c_plus, c_minus, alpha, ran
     mean_diff = np.abs(mean_A - mean_B)  # (T, T)
     
     # Apply fairness mask
-    util_masked = np.where(mean_diff < alpha, util_combined, -np.inf)
+    util_masked = np.where(mean_diff <= alpha, util_combined, -np.inf)
     
     
     # Find optimal combination
@@ -198,7 +198,20 @@ def alt_fair_opt_step(pop_A, pop_B, u_plus, u_minus, c_plus, c_minus, alpha, ran
         return None, None, None, None, -np.inf
     
     
-    i, j = np.unravel_index(np.argmax(util_masked), util_masked.shape)
+    #i, j = np.unravel_index(np.argmax(util_masked), util_masked.shape)
+
+    #'''
+    flat = util_masked.flatten()
+    epsilon = 0.1
+    arg_max = 0
+    for k in reversed(range(len(flat))):
+        if flat[k] >= flat[arg_max] + epsilon:
+            arg_max = k
+
+    i, j = np.unravel_index(arg_max, util_masked.shape)
+    #'''
+
+
     
     # Extract optimal results
     opt_A = a_adj[i, j]
