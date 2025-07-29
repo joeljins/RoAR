@@ -2,9 +2,9 @@ from utils import expected, alt_fair_opt_step
 import plotly.graph_objects as go
 import numpy as np
 
-def experiment_3(a, b, u_plus, u_minus, c_plus, c_minus, alpha, domain, interval, w_a, w_b):
+def experiment_3(a, b, u_plus, u_minus, c_plus, c_minus, alpha, thresholds, w_a, w_b):
     # B starts out at the optimal threshold regardless of Alpha
-    results = alt_fair_opt_step(a, b, u_plus, u_minus, c_plus, c_minus, alpha, domain, interval)
+    results = alt_fair_opt_step(a, b, u_plus, u_minus, c_plus, c_minus, alpha, thresholds)
 
     thresh_B = results[3] 
 
@@ -18,7 +18,7 @@ def experiment_3(a, b, u_plus, u_minus, c_plus, c_minus, alpha, domain, interval
     all_sets = {}
     greatest = -np.inf
 
-    for thresh_A in np.arange(domain[1], domain[0], -interval):
+    for thresh_A in thresholds:
         A = np.where(a > thresh_A, a + delta_A, a)
         diff = np.abs(np.mean(A) - np.mean(B))
             

@@ -129,10 +129,7 @@ def fair_opt_step(A, B, u_plus, u_minus, c_plus, c_minus, alpha):
 
     return (opt_A, opt_B, max_util, updated_samples, total_util[i_idx][j_idx])
 
-def alt_fair_opt_step(pop_A, pop_B, u_plus, u_minus, c_plus, c_minus, alpha, range_param, size):
-
-    begin, end = range_param
-    thresholds = np.arange(begin, end, size)
+def alt_fair_opt_step(pop_A, pop_B, u_plus, u_minus, c_plus, c_minus, alpha, thresholds):
     T = len(thresholds)
     
     pop_A = np.asarray(pop_A)
@@ -198,9 +195,9 @@ def alt_fair_opt_step(pop_A, pop_B, u_plus, u_minus, c_plus, c_minus, alpha, ran
         return None, None, None, None, -np.inf
     
     
-    #i, j = np.unravel_index(np.argmax(util_masked), util_masked.shape)
+    i, j = np.unravel_index(np.argmax(util_masked), util_masked.shape)
 
-    #'''
+    '''
     flat = util_masked.flatten()
     epsilon = 0.1
     arg_max = 0
@@ -209,8 +206,7 @@ def alt_fair_opt_step(pop_A, pop_B, u_plus, u_minus, c_plus, c_minus, alpha, ran
             arg_max = k
 
     i, j = np.unravel_index(arg_max, util_masked.shape)
-    #'''
-
+    '''
 
     
     # Extract optimal results
