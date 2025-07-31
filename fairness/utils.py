@@ -53,12 +53,9 @@ def opt_threshold(domain, u_plus, u_minus):
     return root
 
 def change(A, B, c_plus, c_minus, u_plus, u_minus, prob=0.4):
-    
-    # Working with array-like structures
     A = np.asarray(A)
     B = np.asarray(B)
 
-    # Calculated predicted change of both sets of samples
     delta_A = expected(A, c_plus, c_minus)
     delta_B = expected(B, c_plus, c_minus)
 
@@ -73,8 +70,8 @@ def change(A, B, c_plus, c_minus, u_plus, u_minus, prob=0.4):
     noise = (B_matrix + delta_B_matrix) == B_matrix.T
     B_matrix = np.where(noise, B_matrix + jitter, B_matrix)
     
-    A_matrix = np.where(A_matrix + delta_A_matrix > A_matrix.T, A_matrix + delta_A_matrix, A_matrix)
-    B_matrix = np.where(B_matrix + delta_B_matrix > B_matrix.T, B_matrix + delta_B_matrix, B_matrix)
+    A_matrix = np.where(A_matrix > A_matrix.T, A_matrix + delta_A_matrix, A_matrix)
+    B_matrix = np.where(B_matrix > B_matrix.T, B_matrix + delta_B_matrix, B_matrix)
 
     mean_A = np.mean(A_matrix, axis=0)
     mean_B = np.mean(B_matrix, axis=0)
@@ -89,14 +86,11 @@ def change(A, B, c_plus, c_minus, u_plus, u_minus, prob=0.4):
     return mean_A, mean_B, util_A, util_B
 
 def fair_opt_step(A, B, u_plus, u_minus, c_plus, c_minus, alpha):
-    
-    # Working with array-like structures
     A = np.array(A)
     B = np.array(B)
     np.random.seed(1)
     prob = 0.4
 
-    # Calculate population percentages
     w_a = len(A) / (len(A) + len(B))
     w_b = 1 - w_a
 
@@ -104,7 +98,6 @@ def fair_opt_step(A, B, u_plus, u_minus, c_plus, c_minus, alpha):
     mean_A, mean_B = np.meshgrid(A, B, indexing='ij')
     util_A, util_B = np.meshgrid(A, B, indexing='ij')
 
-    # Matrix of every threshold combination
     mean_A, mean_B, util_A, util_B = change(A, B, c_plus, c_minus, u_plus, u_minus, prob)
 
     # Calculate fairness difference at each pair
@@ -114,7 +107,6 @@ def fair_opt_step(A, B, u_plus, u_minus, c_plus, c_minus, alpha):
     total_util = w_a * util_A + w_b * util_B
 
     # Mask utilities violating fairness constraint
-
     total_util[fairness_diff > alpha] = -np.inf
 
     flat_idx = np.argmax(total_util)
@@ -127,7 +119,7 @@ def fair_opt_step(A, B, u_plus, u_minus, c_plus, c_minus, alpha):
 
     max_util = total_util[i_idx, j_idx]
 
-    return (opt_A, opt_B, max_util, updated_samples, total_util[i_idx][j_idx])
+    return (opt_A, opt_B, max_util, updated_samples)
 
 def alt_fair_opt_step(pop_A, pop_B, u_plus, u_minus, c_plus, c_minus, alpha, thresholds):
     T = len(thresholds)
