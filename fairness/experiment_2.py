@@ -56,25 +56,25 @@ def experiment_2(a, b, u_plus, u_minus, c_plus, c_minus, alpha, w_a, w_b, thresh
     )
 
     if alphas is None:
-        return fig1
+        return fig1, None
 
     y_means_diff = np.array(y_means_diff)
     x_alphas = []
     y_thresh_A = []
-    prev = 0
-    arr = np.argsort(y_means_diff)
+
+    #arr = np.argsort(y_means_diff)
     for alpha in alphas:
-        arr = arr[prev:]
-        condition = y_means_diff[arr] < alpha
-        indices = arr[condition]
-        if indices.size == 0:
+        #condition = y_means_diff[arr] < alpha
+        #indices = arr[condition]
+        #if indices.size == 0:
+        #    continue
+        max_util_idx = np.argmax(y_means_diff < alpha)
+        if max_util_idx == 0:
             continue
-        max_util_idx = indices.max()
 
         x_alphas.append(alpha)
         y_thresh_A.append(x_thresh_A[max_util_idx])
         
-        prev = np.where(arr == max_util_idx)[0][0] + 1 
 
     thresholds = go.Scatter(x = x_alphas, y = y_thresh_A, mode = 'markers')
     fig2 = go.Figure(data=[thresholds])
