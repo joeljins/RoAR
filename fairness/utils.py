@@ -1,14 +1,16 @@
 import numpy as np
 from scipy.optimize import fsolve
 
-### General utility functions ###
-
-# p : X -> [0,1]
-# p is any monotonic function
 def p(x) -> float:
+    '''
+    p : a monotonic function
+    p : X -> [0,1]
+    p : sigmoid
+    '''
     return 1 / (1 + np.exp(-x))
 
 def expected(x, plus, minus):
+    '''p(x) * plus + (1-p(x)) * minus'''
     return p(x) * plus + (1-p(x)) * minus
 
 ### Utility functions for threshold selected from samples ###
