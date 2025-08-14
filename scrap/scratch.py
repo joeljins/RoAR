@@ -123,3 +123,26 @@ def fair_opt_step(A, B, u_plus, u_minus, c_plus, c_minus, alpha):
     max_util = total_util[i_idx, j_idx]
 
     return (opt_A, opt_B, max_util, updated_samples, total_util[i_idx][j_idx])
+
+def opt_threshold(domain, u_plus, u_minus):
+    """
+    Find optimal threshold by solving for where expected value equals zero
+    """
+    # Define the function to find roots of
+    def objective(x):
+        return expected(x, u_plus, u_minus)
+    
+    # Find root within the domain
+    if isinstance(domain, (list, tuple)) and len(domain) == 2:
+        # If domain is a range, use bounds
+        from scipy.optimize import brentq
+        try:
+            root = brentq(objective, domain[0], domain[1])
+        except ValueError:
+            # If no root in interval, use fsolve with midpoint
+            root = fsolve(objective, x0=(domain[0] + domain[1]) / 2)[0]
+    else:
+        # Use fsolve with initial guess
+        root = fsolve(objective, x0=0)[0]
+    
+    return root

@@ -11,45 +11,23 @@ def expected(x, plus, minus):
     '''p(x) * plus + (1-p(x)) * minus'''
     return p(x) * plus + (1-p(x)) * minus
 
-def opt_step(X, u_plus, u_minus, c_plus, c_minus):
-    X = np.asarray(X)
+def opt_step(x, u_plus, u_minus, c_plus, c_minus):
+    '''Applies change to x if expected utility is positive'''
+    '''Return smallest threshold where utility is positive'''
+    x = np.asarray(x)
 
-    # Calculate utility and predicted change of all samples
-    exp_util = expected(X, u_plus, u_minus) 
-    delta_x = expected(X, c_plus, c_minus)
+    exp_util = expected(x, u_plus, u_minus) 
+    delta_X = expected(x, c_plus, c_minus)
 
-    # Add predicted change to sample if utility is positive else return sample
-    max_util = np.where(exp_util > 0, X + delta_x, X) 
+    X = np.where(exp_util > 0, x + delta_X, x) 
 
     # Smallest threshold where utility is positive
-    thresholds = X[exp_util > 0]
+    thresholds = x[exp_util > 0]
     opt_thresh = np.min(thresholds) if thresholds.size > 0 else None
 
     # array of updated samples, min sample whose util is positive
-    return (max_util, opt_thresh)
+    return (X, opt_thresh)
 
-def opt_threshold(domain, u_plus, u_minus):
-    """
-    Find optimal threshold by solving for where expected value equals zero
-    """
-    # Define the function to find roots of
-    def objective(x):
-        return expected(x, u_plus, u_minus)
-    
-    # Find root within the domain
-    if isinstance(domain, (list, tuple)) and len(domain) == 2:
-        # If domain is a range, use bounds
-        from scipy.optimize import brentq
-        try:
-            root = brentq(objective, domain[0], domain[1])
-        except ValueError:
-            # If no root in interval, use fsolve with midpoint
-            root = fsolve(objective, x0=(domain[0] + domain[1]) / 2)[0]
-    else:
-        # Use fsolve with initial guess
-        root = fsolve(objective, x0=0)[0]
-    
-    return root
 
 def change(A, B, c_plus, c_minus, u_plus, u_minus, prob=0.4):
     A = np.asarray(A)
@@ -82,7 +60,7 @@ def change(A, B, c_plus, c_minus, u_plus, u_minus, prob=0.4):
     util_A = np.repeat(util_A, util_A.shape[0]).reshape((util_A.shape[0], util_A.shape[0]))
     util_B = np.repeat(util_B, util_B.shape[0]).reshape((util_B.shape[0], util_B.shape[0]))
 
-    return mean_A, mean_B, util_A, util_B
+    return mean_A, mean_B, util_A, util_B, A_matrix, B_matrix
 
 def fair_opt_step(A, B, u_plus, u_minus, c_plus, c_minus, alpha):
     A = np.array(A)
@@ -223,7 +201,7 @@ def sampl_fair_opt_step(A, B, u_plus, u_minus, c_plus, c_minus, alpha):
     w_a = len(A) / (len(A) + len(B))
     w_b = 1 - w_a
 
-    mean_A, mean_B, util_A, util_B = change(A, B, c_plus, c_minus, u_plus, u_minus)
+    mean_A, mean_B, util_A, util_B = mat_vect(A, B, c_plus, c_minus, u_plus, u_minus)
 
     fairness_diff = np.abs(mean_A - mean_B)
     total_util = w_a * util_A + w_b * util_B
@@ -243,7 +221,8 @@ def sampl_fair_opt_step(A, B, u_plus, u_minus, c_plus, c_minus, alpha):
 
     return (opt_A, opt_B, max_util, updated_samples)
 
-def change(A, B, c_plus, c_minus, u_plus, u_minus, prob=0.4):
+def mat_vect(A, B, c_plus, c_minus, u_plus, u_minus, prob=0.4):
+    '''Matrix-vectorization of grid search'''
     A = np.asarray(A)
     B = np.asarray(B)
 
