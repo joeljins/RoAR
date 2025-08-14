@@ -3,9 +3,7 @@ from scipy.optimize import fsolve
 
 def p(x) -> float:
     '''
-    p : a monotonic function
-    p : X -> [0,1]
-    p : sigmoid
+    p : a monotonic function, X -> [0,1], e.g. sigmoid
     '''
     return 1 / (1 + np.exp(-x))
 
@@ -13,7 +11,6 @@ def expected(x, plus, minus):
     '''p(x) * plus + (1-p(x)) * minus'''
     return p(x) * plus + (1-p(x)) * minus
 
-### Utility functions for threshold selected from samples ###
 def opt_step(X, u_plus, u_minus, c_plus, c_minus):
     X = np.asarray(X)
 
@@ -123,20 +120,23 @@ def fair_opt_step(A, B, u_plus, u_minus, c_plus, c_minus, alpha):
 
     return (opt_A, opt_B, max_util, updated_samples)
 
-def alt_fair_opt_step(pop_A, pop_B, u_plus, u_minus, c_plus, c_minus, alpha, thresholds):
+def itvl_fair_opt_step(a, b, u_plus, u_minus, c_plus, c_minus, alpha, thresholds):
+    '''
+    Vectorized grid search for pair of thresholds(intervals) with max utilty and fairness constraint fulfilled
+    '''
     T = len(thresholds)
     
-    pop_A = np.asarray(pop_A)
-    pop_B = np.asarray(pop_B)
-    n, m = len(pop_A), len(pop_B)
+    a = np.asarray(a)
+    b = np.asarray(b)
+    n, m = len(a), len(b)
     
     # Weights
     w_a = n / (n + m)
     w_b = 1 - w_a
     
     # Compute deltas
-    delta_A = expected(pop_A, c_plus, c_minus)  # Shape: (n,)
-    delta_B = expected(pop_B, c_plus, c_minus)  # Shape: (m,)
+    delta_A = expected(a, c_plus, c_minus)  # Shape: (n,)
+    delta_B = expected(b, c_plus, c_minus)  # Shape: (m,)
     
     # Create threshold meshgrid
     thresh_a, thresh_b = np.meshgrid(thresholds, thresholds, indexing='ij')  # (T, T)
@@ -146,8 +146,8 @@ def alt_fair_opt_step(pop_A, pop_B, u_plus, u_minus, c_plus, c_minus, alpha, thr
     thresh_b_bc = thresh_b[:, :, np.newaxis]  # (T, T, 1)
     
     # Expand populations and deltas for broadcasting
-    A_bc = pop_A[np.newaxis, np.newaxis, :]      # (1, 1, n)
-    B_bc = pop_B[np.newaxis, np.newaxis, :]      # (1, 1, m)
+    A_bc = a[np.newaxis, np.newaxis, :]      # (1, 1, n)
+    B_bc = b[np.newaxis, np.newaxis, :]      # (1, 1, m)
     delta_A_bc = delta_A[np.newaxis, np.newaxis, :]  # (1, 1, n)
     delta_B_bc = delta_B[np.newaxis, np.newaxis, :]  # (1, 1, m)
     
@@ -212,34 +212,69 @@ def alt_fair_opt_step(pop_A, pop_B, u_plus, u_minus, c_plus, c_minus, alpha, thr
     
     return opt_A, opt_B, thresh_A, thresh_B, max_util
 
-def alt_fair_step(A, B, u_plus, u_minus, c_plus, c_minus, alpha, domain, size):
-    begin = domain[0]
-    end = domain[1]
-    thresholds = np.arange(begin, end, size)
-
-    max_util = -np.inf
-    opt_A = None
-    opt_B = None
-    thresh_A = None
-    thresh_B = None 
+def sampl_fair_opt_step(A, B, u_plus, u_minus, c_plus, c_minus, alpha):
+    '''
+    Vectorized grid search for pair of thresholds(samples) with max utilty and fairness constraint fulfilled
+    '''
+    A = np.asarray(A)
+    B = np.asarray(B)
+    np.random.seed(1)
 
     w_a = len(A) / (len(A) + len(B))
     w_b = 1 - w_a
+
+    mean_A, mean_B, util_A, util_B = change(A, B, c_plus, c_minus, u_plus, u_minus)
+
+    fairness_diff = np.abs(mean_A - mean_B)
+    total_util = w_a * util_A + w_b * util_B
+
+    # Apply fairness constraint
+    total_util_masked = np.where(fairness_diff <= alpha, total_util, -np.inf)
+
+    # Find best pair (max utility under fairness constraint)
+
+    flat_idx = np.argmax(total_util_masked)
+    i, j = np.unravel_index(flat_idx, total_util.shape)
+
+    opt_A = A[i]
+    opt_B = B[j]
+    updated_samples = (mean_A[i, j], mean_B[i, j])
+    max_util = total_util_masked[i, j]
+
+    return (opt_A, opt_B, max_util, updated_samples)
+
+def change(A, B, c_plus, c_minus, u_plus, u_minus, prob=0.4):
+    A = np.asarray(A)
+    B = np.asarray(B)
+
     delta_A = expected(A, c_plus, c_minus)
     delta_B = expected(B, c_plus, c_minus)
 
-    for threshold_A in thresholds:
-            for threshold_B in thresholds:
-                a = np.where(A + delta_A > threshold_A, A + delta_A, A )
-                b = np.where(B + delta_B > threshold_B, B + delta_B, B )
-                if np.abs( np.mean(a) - np.mean(b) ) >= alpha:
-                    continue
-                util = w_a * np.sum(expected(a, u_plus, u_minus)) + w_b * np.sum(expected(b, u_plus, u_minus))
-                if util >= max_util: 
-                    max_util = util
-                    opt_A = a
-                    opt_B = b
-                    thresh_A = threshold_A
-                    thresh_B = threshold_B
+    A_matrix = A[:, None]  # shape (n, 1)
+    B_matrix = B[:, None]  # shape (m, 1)
 
-    return opt_A, opt_B, thresh_A, thresh_B, max_util
+    delta_A_matrix = delta_A[:, None]
+    delta_B_matrix = delta_B[:, None]
+
+    # Add small jitter to break ties
+    #jitter_A = np.random.choice([1e-8, -1e-8], size=A.shape, p=[0.4, 0.6])
+    #jitter_B = np.random.choice([1e-8, -1e-8], size=B.shape, p=[0.4, 0.6])
+
+    A_matrix_adj = np.where(A_matrix > A_matrix.T, A_matrix + delta_A_matrix, A_matrix)
+    B_matrix_adj = np.where(B_matrix > B_matrix.T, B_matrix + delta_B_matrix, B_matrix)
+
+    # Break ties
+    #A_matrix_adj = np.where(A_matrix + delta_A_matrix == A_matrix.T, A_matrix + jitter_A[:, None], A_matrix_adj)
+    #B_matrix_adj = np.where(B_matrix + delta_B_matrix == B_matrix.T, B_matrix + jitter_B[:, None], B_matrix_adj)
+
+    mean_A = np.mean(A_matrix_adj, axis=0)
+    mean_B = np.mean(B_matrix_adj, axis=0)
+
+    util_A = np.sum(expected(A_matrix_adj, u_plus, u_minus), axis=0)
+    util_B = np.sum(expected(B_matrix_adj, u_plus, u_minus), axis=0)
+
+    # Convert to meshgrids for threshold pairs
+    mean_A_grid, mean_B_grid = np.meshgrid(mean_A, mean_B, indexing='ij')
+    util_A_grid, util_B_grid = np.meshgrid(util_A, util_B, indexing='ij')
+
+    return mean_A_grid, mean_B_grid, util_A_grid, util_B_grid
