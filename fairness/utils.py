@@ -41,12 +41,13 @@ def change(A, B, c_plus, c_minus, u_plus, u_minus, prob=0.4):
     delta_A_matrix = np.repeat(delta_A, A.shape[0]).reshape((A.shape[0], A.shape[0]))
     delta_B_matrix = np.repeat(delta_B, B.shape[0]).reshape((B.shape[0], B.shape[0]))
 
+    '''
     jitter = np.random.choice([1e-8, -1e-8], size=A.shape, p=[0.4, 0.6])
     noise = (A_matrix + delta_A_matrix) == A_matrix.T
     A_matrix = np.where(noise, A_matrix + jitter, A_matrix)
     noise = (B_matrix + delta_B_matrix) == B_matrix.T
     B_matrix = np.where(noise, B_matrix + jitter, B_matrix)
-    
+    '''
     A_matrix = np.where(A_matrix > A_matrix.T, A_matrix + delta_A_matrix, A_matrix)
     B_matrix = np.where(B_matrix > B_matrix.T, B_matrix + delta_B_matrix, B_matrix)
 
@@ -75,13 +76,13 @@ def fair_opt_step(A, B, u_plus, u_minus, c_plus, c_minus, alpha):
     mean_A, mean_B = np.meshgrid(A, B, indexing='ij')
     util_A, util_B = np.meshgrid(A, B, indexing='ij')
 
-    mean_A, mean_B, util_A, util_B = change(A, B, c_plus, c_minus, u_plus, u_minus, prob)
+    mean_A, mean_B, util_A, util_B, _, _ = change(A, B, c_plus, c_minus, u_plus, u_minus, prob)
 
     # Calculate fairness difference at each pair
     fairness_diff = np.abs(mean_A - mean_B)
 
     # Calculate weighted total utility for each pair
-    total_util = w_a * util_A + w_b * util_B
+    total_util = w_a * util_A + w_b * util_B.T
 
     # Mask utilities violating fairness constraint
     total_util[fairness_diff > alpha] = -np.inf
@@ -89,14 +90,14 @@ def fair_opt_step(A, B, u_plus, u_minus, c_plus, c_minus, alpha):
     flat_idx = np.argmax(total_util)
     i_idx, j_idx = np.unravel_index(flat_idx, total_util.shape)
 
-    opt_A = A[i_idx]  # index along A dimension
-    opt_B = B[j_idx]  # index along B dimension
+    thresh_A = A[i_idx]  # index along A dimension
+    thresh_B = B[j_idx]  # index along B dimension
 
     updated_samples = (mean_A[i_idx, j_idx], mean_B[i_idx, j_idx])  # updated after change
 
     max_util = total_util[i_idx, j_idx]
 
-    return (opt_A, opt_B, max_util, updated_samples)
+    return (thresh_A, thresh_B, max_util, updated_samples)
 
 def itvl_fair_opt_step(a, b, u_plus, u_minus, c_plus, c_minus, alpha, thresholds):
     '''
@@ -214,12 +215,12 @@ def sampl_fair_opt_step(A, B, u_plus, u_minus, c_plus, c_minus, alpha):
     flat_idx = np.argmax(total_util_masked)
     i, j = np.unravel_index(flat_idx, total_util.shape)
 
-    opt_A = A[i]
-    opt_B = B[j]
+    thresh_A = A[i]
+    thresh_B = B[j]
     updated_samples = (mean_A[i, j], mean_B[i, j])
     max_util = total_util_masked[i, j]
 
-    return (opt_A, opt_B, max_util, updated_samples)
+    return (thresh_A, thresh_B, max_util, updated_samples)
 
 def mat_vect(A, B, c_plus, c_minus, u_plus, u_minus, prob=0.4):
     '''Matrix-vectorization of grid search'''
