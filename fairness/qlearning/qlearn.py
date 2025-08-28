@@ -23,7 +23,7 @@ ACTIONS = list(product(ACTIONS, repeat=2))
 
 class State:
     '''
-    The state is represented by x buckets, where each bucket holds all samples in y-z% of the distribtution
+    The state is represented by x buckets, where each bucket holds all samples in y-z% of the distribtution \n
     4 buckets, bucket 1 holds 0-25%, bucket 2 holds 25-50%, etc.
     A unique state would be a tuple of the number of samples in each bucket
     10 Samples : buckets_a(2, 4, 3, 1), buckets_b(1, 3, 5, 1)
