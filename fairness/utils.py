@@ -236,10 +236,6 @@ def mat_vect(A, B, c_plus, c_minus, u_plus, u_minus, prob=0.4):
     delta_A_matrix = delta_A[:, None]
     delta_B_matrix = delta_B[:, None]
 
-    # Add small jitter to break ties
-    #jitter_A = np.random.choice([1e-8, -1e-8], size=A.shape, p=[0.4, 0.6])
-    #jitter_B = np.random.choice([1e-8, -1e-8], size=B.shape, p=[0.4, 0.6])
-
     A_matrix_adj = np.where(A_matrix > A_matrix.T, A_matrix + delta_A_matrix, A_matrix)
     B_matrix_adj = np.where(B_matrix > B_matrix.T, B_matrix + delta_B_matrix, B_matrix)
 
